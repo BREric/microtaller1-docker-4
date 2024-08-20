@@ -1,4 +1,4 @@
-package co.org.uniquindio.retosmicroservicios.reto3;
+package co.org.uniquindio.retosmicroservicios;
 
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;

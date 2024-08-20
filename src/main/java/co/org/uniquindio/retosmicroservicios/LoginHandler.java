@@ -1,13 +1,10 @@
-package co.org.uniquindio.retosmicroservicios.reto2;
+package co.org.uniquindio.retosmicroservicios;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.security.Keys;
 
-import javax.crypto.SecretKey;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -16,7 +13,6 @@ import java.util.Date;
 import java.util.Map;
 
 public class LoginHandler implements HttpHandler {
-    private static final SecretKey SECRET_KEY = Keys.secretKeyFor(SignatureAlgorithm.HS256); // Genera una clave segura
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
@@ -29,13 +25,21 @@ public class LoginHandler implements HttpHandler {
             String clave = requestMap.get("clave");
 
             if (usuario != null && clave != null) {
-                String jwt = generateJwt(usuario);
-                String response = "{\"token\":\"" + jwt + "\"}";
-                exchange.getResponseHeaders().add("Content-Type", "application/json");
-                exchange.sendResponseHeaders(200, response.getBytes(StandardCharsets.UTF_8).length);
-                OutputStream os = exchange.getResponseBody();
-                os.write(response.getBytes(StandardCharsets.UTF_8));
-                os.close();
+                if (validarCredenciales(usuario, clave)) {
+                    String jwt = generateJwt(usuario);
+                    String response = "{\"token\":\"" + jwt + "\"}";
+                    exchange.getResponseHeaders().add("Content-Type", "application/json");
+                    exchange.sendResponseHeaders(200, response.getBytes(StandardCharsets.UTF_8).length);
+                    OutputStream os = exchange.getResponseBody();
+                    os.write(response.getBytes(StandardCharsets.UTF_8));
+                    os.close();
+                } else {
+                    String response = "Unauthorized: Usuario o clave incorrectos";
+                    exchange.sendResponseHeaders(401, response.getBytes(StandardCharsets.UTF_8).length);
+                    OutputStream os = exchange.getResponseBody();
+                    os.write(response.getBytes(StandardCharsets.UTF_8));
+                    os.close();
+                }
             } else {
                 String response = "Solicitud no válida: Los atributos 'usuario' y 'clave' son obligatorios";
                 exchange.sendResponseHeaders(400, response.getBytes(StandardCharsets.UTF_8).length);
@@ -52,6 +56,10 @@ public class LoginHandler implements HttpHandler {
         }
     }
 
+    private boolean validarCredenciales(String usuario, String clave) {
+        return "admin".equals(usuario) && "password123".equals(clave);
+    }
+
     private String generateJwt(String usuario) {
         long nowMillis = System.currentTimeMillis();
         long expMillis = nowMillis + 3600000; // 1 hora en milisegundos
@@ -64,7 +72,7 @@ public class LoginHandler implements HttpHandler {
                 .setIssuer("ingesis.uniquindio.edu.co")
                 .setIssuedAt(now)
                 .setExpiration(exp)
-                .signWith(SECRET_KEY)
+                .signWith(JwtConfig.SECRET_KEY)
                 .compact();
     }
 }

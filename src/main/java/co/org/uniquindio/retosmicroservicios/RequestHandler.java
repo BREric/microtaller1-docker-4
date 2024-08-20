@@ -1,4 +1,4 @@
-package co.org.uniquindio.retosmicroservicios.reto3;
+package co.org.uniquindio.retosmicroservicios;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
