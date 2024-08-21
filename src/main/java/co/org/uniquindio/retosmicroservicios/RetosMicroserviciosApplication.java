@@ -16,7 +16,7 @@ public class RetosMicroserviciosApplication {
             server.createContext("/saludo", new RequestHandler());
             server.createContext("/login", new LoginHandler());
             server.setExecutor(null);
-            System.out.println("Servidor iniciado en el puerto 80...");
+            System.out.println("Servidor iniciado en el puerto 8082...");
             server.start();
         } catch (IOException e) {
             e.printStackTrace();

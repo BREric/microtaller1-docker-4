@@ -9,8 +9,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.Date;
 import java.util.Map;
+import java.util.Date;
 
 public class LoginHandler implements HttpHandler {
 
@@ -24,22 +24,15 @@ public class LoginHandler implements HttpHandler {
             String usuario = requestMap.get("usuario");
             String clave = requestMap.get("clave");
 
+            // Ya no validamos usuario y clave, simplemente generamos el token
             if (usuario != null && clave != null) {
-                if (validarCredenciales(usuario, clave)) {
-                    String jwt = generateJwt(usuario);
-                    String response = "{\"token\":\"" + jwt + "\"}";
-                    exchange.getResponseHeaders().add("Content-Type", "application/json");
-                    exchange.sendResponseHeaders(200, response.getBytes(StandardCharsets.UTF_8).length);
-                    OutputStream os = exchange.getResponseBody();
-                    os.write(response.getBytes(StandardCharsets.UTF_8));
-                    os.close();
-                } else {
-                    String response = "Unauthorized: Usuario o clave incorrectos";
-                    exchange.sendResponseHeaders(401, response.getBytes(StandardCharsets.UTF_8).length);
-                    OutputStream os = exchange.getResponseBody();
-                    os.write(response.getBytes(StandardCharsets.UTF_8));
-                    os.close();
-                }
+                String jwt = generateJwt(usuario);
+                String response = "{\"token\":\"" + jwt + "\"}";
+                exchange.getResponseHeaders().add("Content-Type", "application/json");
+                exchange.sendResponseHeaders(200, response.getBytes(StandardCharsets.UTF_8).length);
+                OutputStream os = exchange.getResponseBody();
+                os.write(response.getBytes(StandardCharsets.UTF_8));
+                os.close();
             } else {
                 String response = "Solicitud no válida: Los atributos 'usuario' y 'clave' son obligatorios";
                 exchange.sendResponseHeaders(400, response.getBytes(StandardCharsets.UTF_8).length);
@@ -54,10 +47,6 @@ public class LoginHandler implements HttpHandler {
             os.write(response.getBytes(StandardCharsets.UTF_8));
             os.close();
         }
-    }
-
-    private boolean validarCredenciales(String usuario, String clave) {
-        return "admin".equals(usuario) && "password123".equals(clave);
     }
 
     private String generateJwt(String usuario) {
